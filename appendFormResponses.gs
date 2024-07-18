@@ -12,14 +12,14 @@ function appendOrUpdateFormResponses() {
   // Create a map of File or Folder Name to row index in Art Files
   var fileMap = {};
   for (var i = 0; i < artFilesData.length; i++) {
-    var fileName = artFilesData[i][2]; // Assuming "File or Folder Name" is the 3rd column (index 2)
+    var fileName = artFilesData[i][3]; // Assuming "File or Folder Name" is the 4th column (index 3)
     fileMap[fileName] = i + 2; // Storing row index, starting from row 2
   }
 
   // Iterate through form responses and append or update rows in Art Files
   for (var j = 0; j < formResponsesData.length; j++) {
     var formData = formResponsesData[j];
-    var formFileName = formData[2]; // Assuming "File or Folder Name" is the 3rd column (index 2)
+    var formFileName = formData[3]; // Assuming "File or Folder Name" is the 4th column (index 3)
     var rowIndex = fileMap[formFileName];
 
     if (rowIndex) {
