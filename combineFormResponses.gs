@@ -20,10 +20,23 @@ function combineAndAppendFormResponses() {
     
     // Check if the fileName already exists in the map
     if (recentEntries[fileName]) {
-      // Compare timestamps and keep the most recent row
-      if (timestamp > recentEntries[fileName].timestamp) {
-        recentEntries[fileName] = {row: row, timestamp: timestamp};
+      var existingRow = recentEntries[fileName].row;
+      var existingTimestamp = recentEntries[fileName].timestamp;
+      var shouldUpdate = false;
+      
+      // Compare each cell and update only if current cell is not blank and existing cell is blank
+      for (var col = 0; col < row.length; col++) {
+        if (row[col] !== '' && (existingRow[col] === '' || existingTimestamp < timestamp)) {
+          existingRow[col] = row[col];
+          shouldUpdate = true;
+        }
       }
+      
+      // Update timestamp if any cell was updated
+      if (shouldUpdate) {
+        recentEntries[fileName] = {row: existingRow, timestamp: timestamp};
+      }
+      
     } else {
       // Add new entry to the map
       recentEntries[fileName] = {row: row, timestamp: timestamp};
