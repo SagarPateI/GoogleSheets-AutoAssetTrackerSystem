@@ -28,16 +28,43 @@ function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet) {
     
     if (formRowIndex !== -1) {
       var formRow = formResponsesData[formRowIndex + 1];
-      var formTimestamp = new Date(formRow[0]);
-      var artTimestamp = new Date(artRow[0]);
       
-      // Update Form Responses only if Art Files has a more recent timestamp or if Form Responses has blanks
-      if (artTimestamp > formTimestamp || formRow.some(cell => cell === '')) {
-        formResponsesSheet.getRange(formRowIndex + 2, 1, 1, formRow.length).setValues([artRow]);
-      }
+      // Update relevant columns from Art Files to Form Responses
+      formRow[0] = new Date(); // Update Timestamp to current date/time
+      formRow[1] = ''; // Clear Email Address column
+      
+      // Update the rest of the columns based on Art Files
+      formRow[2] = artRow[0]; // Asset Type
+      formRow[3] = artRow[1]; // Asset Name
+      formRow[4] = artRow[2]; // Asset Description
+      formRow[5] = artRow[3]; // File or Folder Name
+      formRow[6] = artRow[4]; // Status
+      formRow[7] = artRow[5]; // Priority
+      formRow[8] = artRow[6]; // Start Date
+      formRow[9] = artRow[7]; // End Date
+      formRow[10] = artRow[8]; // Assigned Team Member(s)
+      formRow[11] = artRow[9]; // Issues or Optional Notes?
+      formRow[12] = artRow[10]; // Agalleius Google Drive Link
+      
+      // Set the updated form row back to Form Responses sheet
+      formResponsesSheet.getRange(formRowIndex + 2, 1, 1, formRow.length).setValues([formRow]);
     } else {
       // Append new row to Form Responses if not found
-      formResponsesSheet.appendRow(artRow);
+      formResponsesSheet.appendRow([
+        new Date(), // Timestamp
+        '', // Email Address
+        artRow[0], // Asset Type
+        artRow[1], // Asset Name
+        artRow[2], // Asset Description
+        artRow[3], // File or Folder Name
+        artRow[4], // Status
+        artRow[5], // Priority
+        artRow[6], // Start Date
+        artRow[7], // End Date
+        artRow[8], // Assigned Team Member(s)
+        artRow[9], // Issues or Optional Notes?
+        artRow[10] // Agalleius Google Drive Link
+      ]);
     }
   });
 }
