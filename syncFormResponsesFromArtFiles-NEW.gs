@@ -2,14 +2,14 @@ function combineAndUpdateFormResponses() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var formResponsesSheet = ss.getSheetByName('Form Responses 1');
   var artFilesSheet = ss.getSheetByName('Art Files');
-  
-  // Step 1: Update Form Responses 1 with data from Art Files
+
+  // Step 1: Update Form Responses from Art Files
   updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet);
-  
-  // Step 2: Combine responses in Form Responses 1 sheet
+
+  // Step 2: Combine Responses in Form Responses 1
   combineFormResponses(formResponsesSheet);
-  
-  // Step 3: Append or update Form Responses into Art Files sheet
+
+  // Step 3: Append or Update Form Responses into Art Files
   appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet);
 }
 
@@ -30,10 +30,6 @@ function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet) {
       var formRow = formResponsesData[formRowIndex + 1];
       
       // Update relevant columns from Art Files to Form Responses
-      formRow[0] = new Date(); // Update Timestamp to current date/time
-      formRow[1] = ''; // Clear Email Address column
-      
-      // Update the rest of the columns based on Art Files
       formRow[2] = artRow[0]; // Asset Type
       formRow[3] = artRow[1]; // Asset Name
       formRow[4] = artRow[2]; // Asset Description
@@ -45,6 +41,13 @@ function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet) {
       formRow[10] = artRow[8]; // Assigned Team Member(s)
       formRow[11] = artRow[9]; // Issues or Optional Notes?
       formRow[12] = artRow[10]; // Agalleius Google Drive Link
+      formRow[13] = artRow[11]; // Backup 1
+      formRow[14] = artRow[12]; // Backup 2
+      
+      // Preserve existing Email Address if available
+      if (formRow[1] === '') {
+        formRow[1] = artRow[11]; // Use Email Address from Art Files if Email Address in Form Responses is blank
+      }
       
       // Set the updated form row back to Form Responses sheet
       formResponsesSheet.getRange(formRowIndex + 2, 1, 1, formRow.length).setValues([formRow]);
@@ -52,7 +55,7 @@ function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet) {
       // Append new row to Form Responses if not found
       formResponsesSheet.appendRow([
         new Date(), // Timestamp
-        '', // Email Address
+        artRow[11], // Email Address
         artRow[0], // Asset Type
         artRow[1], // Asset Name
         artRow[2], // Asset Description
@@ -63,7 +66,9 @@ function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet) {
         artRow[7], // End Date
         artRow[8], // Assigned Team Member(s)
         artRow[9], // Issues or Optional Notes?
-        artRow[10] // Agalleius Google Drive Link
+        artRow[10], // Agalleius Google Drive Link
+        artRow[11], // Backup 1
+        artRow[12]  // Backup 2
       ]);
     }
   });
@@ -97,20 +102,20 @@ function combineFormResponses(formResponsesSheet) {
 }
 
 function appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet) {
-  var formResponsesData = formResponsesSheet.getRange('C2:M' + formResponsesSheet.getLastRow()).getValues();
-  var artFilesData = artFilesSheet.getRange(2, 1, artFilesSheet.getLastRow() - 1, 12).getValues();
-  
+  var formResponsesData = formResponsesSheet.getRange('C2:O' + formResponsesSheet.getLastRow()).getValues();
+  var artFilesData = artFilesSheet.getRange(2, 1, artFilesSheet.getLastRow() - 1, 14).getValues();
+
   var fileMap = {};
   for (var i = 0; i < artFilesData.length; i++) {
     var fileName = artFilesData[i][3]; // Assuming "File or Folder Name" is the 4th column (index 3)
     fileMap[fileName] = i + 2; // Storing row index, starting from row 2
   }
-  
+
   for (var j = 0; j < formResponsesData.length; j++) {
     var formData = formResponsesData[j];
     var formFileName = formData[3]; // Assuming "File or Folder Name" is the 4th column (index 3)
     var rowIndex = fileMap[formFileName];
-    
+
     if (rowIndex) {
       artFilesSheet.getRange(rowIndex, 1, 1, formData.length).setValues([formData]);
     } else {
