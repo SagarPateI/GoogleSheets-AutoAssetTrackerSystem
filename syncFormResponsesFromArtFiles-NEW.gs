@@ -47,18 +47,13 @@ function updateFormResponsesFromTable1(formResponsesSheet, table1Sheet) {
       formRow[13] = table1Row[11]; // Backup 1
       formRow[14] = table1Row[12]; // Backup 2
       
-      // Preserve existing Email Address if available
-      if (formRow[1] === '') {
-        formRow[1] = table1Row[11]; // Use Email Address from Table1 if Email Address in Form Responses is blank
-      }
-      
       // Set the updated form row back to Form Responses sheet
       formResponsesSheet.getRange(formRowIndex + 2, 1, 1, formRow.length).setValues([formRow]);
     } else {
       // Append new row to Form Responses if not found
       formResponsesSheet.appendRow([
         new Date(), // Timestamp
-        table1Row[11], // Email Address
+        '', // Email Address
         table1Row[0], // Asset Type
         table1Row[1], // Asset Name
         table1Row[2], // Asset Description
@@ -129,7 +124,7 @@ function appendOrUpdateFormResponses(formResponsesSheet, table1Sheet) {
 
   for (var j = 0; j < formResponsesData.length; j++) {
     var formData = formResponsesData[j];
-    var formFileName = formData[3]; // Assuming "File or Folder Name" is the 4th column (index 3)
+    var formFileName = formData[5]; // Assuming "File or Folder Name" is the 6th column (index 5)
     var rowIndex = fileMap[formFileName];
 
     if (rowIndex) {
