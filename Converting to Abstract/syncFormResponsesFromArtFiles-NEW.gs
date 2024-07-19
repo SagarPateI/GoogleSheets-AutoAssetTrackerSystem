@@ -36,9 +36,8 @@ function combineAndUpdateFormResponses() {
         assignedTeamMembers: 8,
         optionalNotes: 9,
         driveLink: 10,
-        emailAddress: 11,
-        backup1: 12,
-        backup2: 13
+        backup1: 11,
+        backup2: 12
       }
     }
   };
@@ -144,11 +143,11 @@ function appendOrUpdateFormResponses(formResponsesSheet, targetTableSheet, confi
 
   for (var j = 0; j < formResponsesData.length; j++) {
     var formData = formResponsesData[j];
-    var formFileName = formData[config.columns.fileName];
+    var formFileName = formData[config.columns.fileOrFolderName];
     var rowIndex = fileMap[formFileName];
 
     if (rowIndex) {
-      targetTableSheet.getRange(rowIndex, 1, 1, config.numColumns).setValues([formData]);
+      targetTableSheet.getRange(rowIndex, 1, 1, formData.length).setValues([formData]);
     } else {
       targetTableSheet.appendRow(formData);
     }
