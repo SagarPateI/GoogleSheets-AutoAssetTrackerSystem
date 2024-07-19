@@ -148,7 +148,7 @@ function appendOrUpdateFormResponses(formResponsesSheet, targetTableSheet, confi
     var rowIndex = fileMap[formFileName];
 
     if (rowIndex) {
-      targetTableSheet.getRange(rowIndex, 1, 1, formData.length).setValues([formData]);
+      targetTableSheet.getRange(rowIndex, 1, 1, config.numColumns).setValues([formData]);
     } else {
       targetTableSheet.appendRow(formData);
     }
