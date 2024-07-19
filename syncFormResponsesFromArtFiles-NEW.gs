@@ -1,7 +1,7 @@
 function combineAndUpdateFormResponses() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var formResponsesSheet = ss.getSheetByName('Form Responses 1');
-  var table1Sheet = ss.getSheetByName('Art Files');
+  var table1Sheet = ss.getSheetByName('Art Files'); // Sheet name remains "Art Files" but referred to as "Table1"
 
   // Step 1: Update Form Responses from Table1
   updateFormResponsesFromTable1(formResponsesSheet, table1Sheet);
@@ -17,15 +17,13 @@ function updateFormResponsesFromTable1(formResponsesSheet, table1Sheet) {
   var formResponsesData = formResponsesSheet.getDataRange().getValues();
   var table1Data = table1Sheet.getDataRange().getValues();
   
-  Logger.log('Form Responses Data: ' + JSON.stringify(formResponsesData));
-  Logger.log('Table1 Data: ' + JSON.stringify(table1Data));
-
   var formFileNames = formResponsesData.slice(1).map(row => row[5]); // Assuming "File or Folder Name" is the 6th column (index 5)
   var table1FileNames = table1Data.slice(1).map(row => row[3]); // Assuming "File or Folder Name" is the 4th column (index 3)
   
-  Logger.log('Form File Names: ' + JSON.stringify(formFileNames));
-  Logger.log('Table1 File Names: ' + JSON.stringify(table1FileNames));
-
+  // Debug: Log data for troubleshooting
+  Logger.log('Form Responses Data: ' + JSON.stringify(formResponsesData));
+  Logger.log('Table1 Data: ' + JSON.stringify(table1Data));
+  
   // Iterate through Table1 and update Form Responses if needed
   table1Data.slice(1).forEach(table1Row => {
     var fileName = table1Row[3]; // Assuming "File or Folder Name" is the 4th column (index 3)
@@ -56,7 +54,6 @@ function updateFormResponsesFromTable1(formResponsesSheet, table1Sheet) {
       
       // Set the updated form row back to Form Responses sheet
       formResponsesSheet.getRange(formRowIndex + 2, 1, 1, formRow.length).setValues([formRow]);
-      Logger.log('Updated Form Responses Row: ' + JSON.stringify(formRow));
     } else {
       // Append new row to Form Responses if not found
       formResponsesSheet.appendRow([
@@ -76,7 +73,6 @@ function updateFormResponsesFromTable1(formResponsesSheet, table1Sheet) {
         table1Row[11], // Backup 1
         table1Row[12]  // Backup 2
       ]);
-      Logger.log('Appended New Form Responses Row: ' + JSON.stringify(table1Row));
     }
   });
 }
@@ -86,8 +82,9 @@ function combineFormResponses(formResponsesSheet) {
   var recentEntries = {};
   var headers = data[0];
   
-  Logger.log('Original Form Responses Data: ' + JSON.stringify(data));
-
+  // Debug: Log data for troubleshooting
+  Logger.log('Form Responses Data: ' + JSON.stringify(data));
+  
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
     var timestamp = new Date(row[0]);
@@ -105,11 +102,8 @@ function combineFormResponses(formResponsesSheet) {
   formResponsesSheet.clear();
   formResponsesSheet.appendRow(headers);
   
-  Logger.log('Recent Entries: ' + JSON.stringify(recentEntries));
-  
   for (var key in recentEntries) {
     formResponsesSheet.appendRow(recentEntries[key].row);
-    Logger.log('Appending Row: ' + JSON.stringify(recentEntries[key].row));
   }
 }
 
@@ -130,6 +124,7 @@ function appendOrUpdateFormResponses(formResponsesSheet, table1Sheet) {
     fileMap[fileName] = i + 2; // Storing row index, starting from row 2
   }
 
+  // Debug: Log file map for troubleshooting
   Logger.log('File Map: ' + JSON.stringify(fileMap));
 
   for (var j = 0; j < formResponsesData.length; j++) {
@@ -139,10 +134,8 @@ function appendOrUpdateFormResponses(formResponsesSheet, table1Sheet) {
 
     if (rowIndex) {
       table1Sheet.getRange(rowIndex, 1, 1, formData.length).setValues([formData]);
-      Logger.log('Updated Table1 Row: ' + JSON.stringify(formData) + ' at index ' + rowIndex);
     } else {
       table1Sheet.appendRow(formData);
-      Logger.log('Appended New Table1 Row: ' + JSON.stringify(formData));
     }
   }
 }
