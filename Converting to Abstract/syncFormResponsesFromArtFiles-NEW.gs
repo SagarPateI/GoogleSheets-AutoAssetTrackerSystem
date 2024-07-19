@@ -2,14 +2,14 @@ function combineAndUpdateFormResponses() {
   // Configuration
   var config = {
     formResponsesSheetName: 'Form Responses 1',
-    artFilesSheetName: 'Art Files',
+    targetTableSheetName: 'Art Files',
     numColumns: 14,
     columns: {
       fileName: 5, // Index for "File or Folder Name" in Form Responses (0-based)
       timestamp: 0, // Index for Timestamp in Form Responses (0-based)
       emailAddress: 1, // Index for Email Address in Form Responses (0-based)
-      artFileName: 3, // Index for "File or Folder Name" in Art Files (0-based)
-      formColumns: {
+      targetFileName: 3, // Index for "File or Folder Name" in Target Table (0-based)
+      formResponsesColumns: {
         assetType: 2,
         assetName: 3,
         assetDescription: 4,
@@ -24,7 +24,7 @@ function combineAndUpdateFormResponses() {
         backup1: 13,
         backup2: 14
       },
-      artFileColumns: {
+      targetTableColumns: {
         assetType: 0,
         assetName: 1,
         assetDescription: 2,
@@ -45,41 +45,41 @@ function combineAndUpdateFormResponses() {
 
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var formResponsesSheet = ss.getSheetByName(config.formResponsesSheetName);
-  var artFilesSheet = ss.getSheetByName(config.artFilesSheetName);
+  var targetTableSheet = ss.getSheetByName(config.targetTableSheetName);
 
-  // Step 1: Update Form Responses from Art Files
-  updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet, config);
+  // Step 1: Update Form Responses from Target Table
+  updateFormResponsesFromTargetTable(formResponsesSheet, targetTableSheet, config);
 
   // Step 2: Combine Responses in Form Responses 1
   combineFormResponses(formResponsesSheet, config);
 
-  // Step 3: Append or Update Form Responses into Art Files
-  appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet, config);
+  // Step 3: Append or Update Form Responses into Target Table
+  appendOrUpdateFormResponses(formResponsesSheet, targetTableSheet, config);
 }
 
-function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet, config) {
+function updateFormResponsesFromTargetTable(formResponsesSheet, targetTableSheet, config) {
   var formResponsesData = formResponsesSheet.getDataRange().getValues();
-  var artFilesData = artFilesSheet.getDataRange().getValues();
+  var targetTableData = targetTableSheet.getDataRange().getValues();
   
   var formFileNames = formResponsesData.slice(1).map(row => row[config.columns.fileName]);
-  var artFileNames = artFilesData.slice(1).map(row => row[config.columns.artFileName]);
+  var targetFileNames = targetTableData.slice(1).map(row => row[config.columns.targetFileName]);
   
-  // Iterate through Art Files and update Form Responses if needed
-  artFilesData.slice(1).forEach(artRow => {
-    var fileName = artRow[config.columns.artFileName];
+  // Iterate through Target Table and update Form Responses if needed
+  targetTableData.slice(1).forEach(targetRow => {
+    var fileName = targetRow[config.columns.targetFileName];
     var formRowIndex = formFileNames.indexOf(fileName);
     
     if (formRowIndex !== -1) {
       var formRow = formResponsesData[formRowIndex + 1];
       
-      // Update relevant columns from Art Files to Form Responses
-      for (var key in config.columns.formColumns) {
-        formRow[config.columns.formColumns[key]] = artRow[config.columns.artFileColumns[key]];
+      // Update relevant columns from Target Table to Form Responses
+      for (var key in config.columns.formResponsesColumns) {
+        formRow[config.columns.formResponsesColumns[key]] = targetRow[config.columns.targetTableColumns[key]];
       }
       
       // Preserve existing Email Address if available
       if (formRow[config.columns.emailAddress] === '') {
-        formRow[config.columns.emailAddress] = artRow[config.columns.artFileColumns.emailAddress];
+        formRow[config.columns.emailAddress] = targetRow[config.columns.targetTableColumns.emailAddress];
       }
       
       // Set the updated form row back to Form Responses sheet
@@ -88,10 +88,10 @@ function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet, conf
       // Append new row to Form Responses if not found
       var newRow = new Array(config.numColumns).fill('');
       newRow[config.columns.timestamp] = new Date();
-      for (var key in config.columns.formColumns) {
-        newRow[config.columns.formColumns[key]] = artRow[config.columns.artFileColumns[key]];
+      for (var key in config.columns.formResponsesColumns) {
+        newRow[config.columns.formResponsesColumns[key]] = targetRow[config.columns.targetTableColumns[key]];
       }
-      newRow[config.columns.emailAddress] = artRow[config.columns.artFileColumns.emailAddress];
+      newRow[config.columns.emailAddress] = targetRow[config.columns.targetTableColumns.emailAddress];
       
       formResponsesSheet.appendRow(newRow);
     }
@@ -125,20 +125,20 @@ function combineFormResponses(formResponsesSheet, config) {
   }
 }
 
-function appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet, config) {
+function appendOrUpdateFormResponses(formResponsesSheet, targetTableSheet, config) {
   var formResponsesData = formResponsesSheet.getRange('C2:O' + formResponsesSheet.getLastRow()).getValues();
-  var lastRow = artFilesSheet.getLastRow();
-  var artFilesData;
+  var lastRow = targetTableSheet.getLastRow();
+  var targetTableData;
   
   if (lastRow > 1) {
-    artFilesData = artFilesSheet.getRange(2, 1, lastRow - 1, config.numColumns).getValues();
+    targetTableData = targetTableSheet.getRange(2, 1, lastRow - 1, config.numColumns).getValues();
   } else {
-    artFilesData = [];
+    targetTableData = [];
   }
 
   var fileMap = {};
-  for (var i = 0; i < artFilesData.length; i++) {
-    var fileName = artFilesData[i][config.columns.artFileName];
+  for (var i = 0; i < targetTableData.length; i++) {
+    var fileName = targetTableData[i][config.columns.targetFileName];
     fileMap[fileName] = i + 2; // Storing row index, starting from row 2
   }
 
@@ -148,9 +148,9 @@ function appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet, config) 
     var rowIndex = fileMap[formFileName];
 
     if (rowIndex) {
-      artFilesSheet.getRange(rowIndex, 1, 1, formData.length).setValues([formData]);
+      targetTableSheet.getRange(rowIndex, 1, 1, formData.length).setValues([formData]);
     } else {
-      artFilesSheet.appendRow(formData);
+      targetTableSheet.appendRow(formData);
     }
   }
 }
