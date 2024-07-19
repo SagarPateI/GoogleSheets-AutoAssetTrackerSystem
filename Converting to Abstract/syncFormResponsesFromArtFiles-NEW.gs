@@ -68,15 +68,14 @@ function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet) {
   Logger.log('Art File Names: ' + JSON.stringify(artFileNames));
 
   // Iterate through Art Files and update Form Responses if needed
-  artFilesData.slice(1).forEach(artRow => {
+  artFilesData.slice(1).forEach((artRow, index) => {
     var fileName = artRow[config.columns.targetTableColumns.fileOrFolderName];
-    var artRowIndex = artFilesData.indexOf(artRow);
     var formRowIndex = formFileNames.indexOf(fileName);
     
     Logger.log('Processing Art Row: ' + JSON.stringify(artRow));
     Logger.log('File Name: ' + fileName);
-    Logger.log('Art Row Index: ' + artRowIndex);
-    Logger.log('Form Row Index: ' + formRowIndex);
+    Logger.log('Art Row Index: ' + (index + 2)); // Adjust for header row
+    Logger.log('Form Row Index: ' + (formRowIndex + 2)); // Adjust for header row
     
     if (formRowIndex !== -1) {
       var formRow = formResponsesData[formRowIndex + 1];
@@ -109,7 +108,7 @@ function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet) {
       // Append new row to Form Responses if not found
       formResponsesSheet.appendRow([
         new Date(), // Timestamp
-        artRow[config.columns.targetTableColumns.emailAddress], // Email Address
+        artRow[config.columns.targetTableColumns.emailAddress] || '', // Email Address
         artRow[config.columns.targetTableColumns.assetType], // Asset Type
         artRow[config.columns.targetTableColumns.assetName], // Asset Name
         artRow[config.columns.targetTableColumns.assetDescription], // Asset Description
@@ -176,22 +175,33 @@ function appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet) {
 
   Logger.log('File Map: ' + JSON.stringify(fileMap));
 
+  var updatedRows = new Set();
+  
   for (var j = 0; j < formResponsesData.length; j++) {
     var formData = formResponsesData[j];
     var formFileName = formData[config.columns.formResponsesColumns.fileOrFolderName];
     
     Logger.log('Processing Form Data: ' + JSON.stringify(formData));
     Logger.log('File Name: ' + formFileName);
-
+    
     if (fileMap[formFileName] !== undefined) {
       var rowIndex = fileMap[formFileName];
       Logger.log('Mapping File Name: ' + formFileName + ' to Row Index: ' + rowIndex);
       
       // Update the row in Art Files
       artFilesSheet.getRange(rowIndex, 1, 1, formData.length).setValues([formData]);
+      updatedRows.add(rowIndex);
     } else {
       // Append new row to Art Files
       artFilesSheet.appendRow(formData);
+    }
+  }
+  
+  // Clear any rows in Art Files that were not updated
+  var artFilesRows = artFilesSheet.getRange(2, 1, artFilesSheet.getLastRow() - 1, config.numColumns).getValues();
+  for (var k = 0; k < artFilesRows.length; k++) {
+    if (!updatedRows.has(k + 2)) {
+      artFilesSheet.deleteRow(k + 2);
     }
   }
 }
