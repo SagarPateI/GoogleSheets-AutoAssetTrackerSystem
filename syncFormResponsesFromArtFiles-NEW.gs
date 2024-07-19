@@ -23,7 +23,6 @@ function updateFormResponsesFromArtFiles(formResponsesSheet, artFilesSheet) {
   // Iterate through Art Files and update Form Responses if needed
   artFilesData.slice(1).forEach(artRow => {
     var fileName = artRow[3]; // Assuming "File or Folder Name" is the 4th column (index 3)
-    var artRowIndex = artFilesData.indexOf(artRow);
     var formRowIndex = formFileNames.indexOf(fileName);
     
     if (formRowIndex !== -1) {
@@ -103,7 +102,14 @@ function combineFormResponses(formResponsesSheet) {
 
 function appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet) {
   var formResponsesData = formResponsesSheet.getRange('C2:O' + formResponsesSheet.getLastRow()).getValues();
-  var artFilesData = artFilesSheet.getRange(2, 1, artFilesSheet.getLastRow() - 1, 14).getValues();
+  var lastRow = artFilesSheet.getLastRow();
+  var artFilesData;
+  
+  if (lastRow > 1) {
+    artFilesData = artFilesSheet.getRange(2, 1, lastRow - 1, 14).getValues();
+  } else {
+    artFilesData = [];
+  }
 
   var fileMap = {};
   for (var i = 0; i < artFilesData.length; i++) {
