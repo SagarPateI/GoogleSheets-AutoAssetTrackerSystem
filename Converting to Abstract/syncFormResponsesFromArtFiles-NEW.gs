@@ -213,10 +213,15 @@ function appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet) {
   for (var k = artFilesRows.length - 1; k >= 0; k--) { // Iterate backwards to avoid index shifting
     var rowIndex = k + 2; // Row index in the spreadsheet (considering header row)
     if (!updatedRows.has(rowIndex)) {
-      try {
-        artFilesSheet.deleteRow(rowIndex);
-      } catch (e) {
-        Logger.log('Error deleting row: ' + e.message);
+      // Ensure at least one row remains before deleting
+      if (artFilesSheet.getLastRow() > 1) {
+        try {
+          artFilesSheet.deleteRow(rowIndex);
+        } catch (e) {
+          Logger.log('Error deleting row: ' + e.message);
+        }
+      } else {
+        Logger.log('Skipping row deletion to prevent empty sheet error.');
       }
     }
   }
