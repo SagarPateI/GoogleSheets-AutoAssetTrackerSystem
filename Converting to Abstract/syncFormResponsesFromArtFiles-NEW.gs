@@ -176,32 +176,48 @@ function appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet) {
   Logger.log('File Map: ' + JSON.stringify(fileMap));
 
   var updatedRows = new Set();
-  
+
   for (var j = 0; j < formResponsesData.length; j++) {
     var formRow = formResponsesData[j];
     var formFileName = formRow[config.columns.formResponsesColumns.fileOrFolderName];
-    
+
     Logger.log('Processing Form Data: ' + JSON.stringify(formRow));
     Logger.log('File Name: ' + formFileName);
-    
+
     if (fileMap[formFileName] !== undefined) {
       var rowIndex = fileMap[formFileName];
       Logger.log('Mapping File Name: ' + formFileName + ' to Row Index: ' + rowIndex);
-      
-      // Update the row in Art Files
-      artFilesSheet.getRange(rowIndex, 1, 1, formRow.length).setValues([formRow]);
-      updatedRows.add(rowIndex);
+
+      try {
+        // Check if the row index is within bounds
+        if (rowIndex > 0 && rowIndex <= artFilesSheet.getLastRow()) {
+          // Update the row in Art Files
+          artFilesSheet.getRange(rowIndex, 1, 1, formRow.length).setValues([formRow]);
+          updatedRows.add(rowIndex);
+        }
+      } catch (e) {
+        Logger.log('Error updating row: ' + e.message);
+      }
     } else {
       // Append new row to Art Files
-      artFilesSheet.appendRow(formRow);
+      try {
+        artFilesSheet.appendRow(formRow);
+      } catch (e) {
+        Logger.log('Error appending row: ' + e.message);
+      }
     }
   }
-  
+
   // Clear any rows in Art Files that were not updated
   var artFilesRows = artFilesSheet.getRange(2, 1, artFilesSheet.getLastRow() - 1, config.numColumns).getValues();
-  for (var k = 0; k < artFilesRows.length; k++) {
-    if (!updatedRows.has(k + 2)) {
-      artFilesSheet.deleteRow(k + 2);
+  for (var k = artFilesRows.length - 1; k >= 0; k--) { // Iterate backwards to avoid index shifting
+    var rowIndex = k + 2; // Row index in the spreadsheet (considering header row)
+    if (!updatedRows.has(rowIndex)) {
+      try {
+        artFilesSheet.deleteRow(rowIndex);
+      } catch (e) {
+        Logger.log('Error deleting row: ' + e.message);
+      }
     }
   }
 }
