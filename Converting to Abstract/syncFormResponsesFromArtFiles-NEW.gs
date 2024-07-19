@@ -178,10 +178,10 @@ function appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet) {
   var updatedRows = new Set();
   
   for (var j = 0; j < formResponsesData.length; j++) {
-    var formData = formResponsesData[j];
-    var formFileName = formData[config.columns.formResponsesColumns.fileOrFolderName];
+    var formRow = formResponsesData[j];
+    var formFileName = formRow[config.columns.formResponsesColumns.fileOrFolderName];
     
-    Logger.log('Processing Form Data: ' + JSON.stringify(formData));
+    Logger.log('Processing Form Data: ' + JSON.stringify(formRow));
     Logger.log('File Name: ' + formFileName);
     
     if (fileMap[formFileName] !== undefined) {
@@ -189,11 +189,11 @@ function appendOrUpdateFormResponses(formResponsesSheet, artFilesSheet) {
       Logger.log('Mapping File Name: ' + formFileName + ' to Row Index: ' + rowIndex);
       
       // Update the row in Art Files
-      artFilesSheet.getRange(rowIndex, 1, 1, formData.length).setValues([formData]);
+      artFilesSheet.getRange(rowIndex, 1, 1, formRow.length).setValues([formRow]);
       updatedRows.add(rowIndex);
     } else {
       // Append new row to Art Files
-      artFilesSheet.appendRow(formData);
+      artFilesSheet.appendRow(formRow);
     }
   }
   
