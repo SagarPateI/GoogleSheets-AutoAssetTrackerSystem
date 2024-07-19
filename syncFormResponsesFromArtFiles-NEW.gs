@@ -47,13 +47,18 @@ function updateFormResponsesFromTable1(formResponsesSheet, table1Sheet) {
       formRow[13] = table1Row[11]; // Backup 1
       formRow[14] = table1Row[12]; // Backup 2
       
+      // Preserve existing Email Address if available
+      if (formRow[1] === '') {
+        formRow[1] = table1Row[11]; // Use Email Address from Table1 if Email Address in Form Responses is blank
+      }
+      
       // Set the updated form row back to Form Responses sheet
       formResponsesSheet.getRange(formRowIndex + 2, 1, 1, formRow.length).setValues([formRow]);
     } else {
       // Append new row to Form Responses if not found
       formResponsesSheet.appendRow([
         new Date(), // Timestamp
-        '', // Email Address
+        table1Row[11], // Email Address
         table1Row[0], // Asset Type
         table1Row[1], // Asset Name
         table1Row[2], // Asset Description
