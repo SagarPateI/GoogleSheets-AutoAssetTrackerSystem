@@ -58,7 +58,7 @@ function updateFormResponsesFromTable1(formResponsesSheet, table1Sheet) {
       // Append new row to Form Responses if not found
       formResponsesSheet.appendRow([
         new Date(), // Timestamp
-        table1Row[11], // Email Address
+        '', // Email Address left blank
         table1Row[0], // Asset Type
         table1Row[1], // Asset Name
         table1Row[2], // Asset Description
